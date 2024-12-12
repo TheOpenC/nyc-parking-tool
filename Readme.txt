@@ -1,0 +1,1 @@
+"Dude, where's my car" uses the NYC DOT parking api + google maps to send me reminders to move my car on parking days. It also factors in the 'suspended days calendar' that accounts for religious and government holidays and unique circumstances such as natural disasters or god-forbid a terrorist attack. I'd love to add GIS location and push notifications too over time.     
