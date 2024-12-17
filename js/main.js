@@ -18,4 +18,4 @@ function getFetch() {
     .then((data) => console.log(data))
     .catch((err) => console.error('Error:', err));
 }
-
+ 
