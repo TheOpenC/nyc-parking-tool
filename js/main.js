@@ -26,8 +26,15 @@ const apiUrl = `https://api.nyc.gov/public/api/GetCalendar?fromdate=${month}%2F$
     })
     .then((data) => {
       // the slice here gives us 8 days of parking information
-      let returnedData = JSON.stringify(data["days"].slice(0,8), null, 2);
-      console.log(returnedData)
+      let returnedData = data["days"].slice(0,8)
+      const transformedData = returnedData.map(day => {
+        return {
+          today_id: day.today_id,
+          items: day.items[0]
+        };
+      });
+      JSON.stringify(transformedData, null, 2);
+      console.log(transformedData);
     })
     .catch((err) => console.error('Error:', err));
   
