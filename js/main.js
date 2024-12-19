@@ -1,44 +1,33 @@
 // document.querySelector('button').addEventListener('click', getFetch);
 
-// function getFetch() {
-//   const proxyUrl = 'https://cors-anywhere.herokuapp.com/'; // Public CORS proxy
-// f = from date (today), t = to date (1 week away or whatever timeframe you choose)
-function dateMath(today){
-  
-}
-
 
 let today = new Date();
-let fromDate = today.toLocaleDateString().split("/")
-let toDate = today.setDate(getDate()+ 15)
-//toDate = toDate.toLocaleDateString().split("/")
-console.log(fromDate, toDate)
 
-// let fMonth = split[0]
-// let fDay = split[1]
-// let fYear = split[2] 
+// this resolves formatting issues with dates
+let month = String(today.getMonth()+1).padStart(2, '0');
+let day = String(today.getDate()).padStart(2, '0');
+let year = String(today.getFullYear());
 
 
 
-
-const apiUrl = 'https://api.nyc.gov/public/api/GetCalendar?fromdate=12%2F12%2F2024&todate=01%2F01%2F2025';
- 
+const apiUrl = `https://api.nyc.gov/public/api/GetCalendar?fromdate=${month}%2F${day}%2F${year}&todate=12%2F31%2F2025`;
  
 
-  // fetch(apiUrl, {
-  //   method: 'GET',
-  //   headers: {
-  //     'Cache-Control': 'no-cache',
-  //     'Ocp-Apim-Subscription-Key': 'f900a38d921947fa920d239f7931049f'
-  //   }
-  // })
-  //   .then((response) => {
-  //     if (!response.ok) throw new Error('Network response was not ok');
-  //     return response.json();
-  //   })
-  //   .then((data) => {
-  //     console.log(JSON.stringify(data, null, 2));
-  //   })
-  //   .catch((err) => console.error('Error:', err));
+  fetch(apiUrl, {
+    method: 'GET',
+    headers: {
+      'Cache-Control': 'no-cache',
+      'Ocp-Apim-Subscription-Key': 'f900a38d921947fa920d239f7931049f'
+    }
+  })
+    .then((response) => {
+      if (!response.ok) throw new Error('Network response was not ok');
+      return response.json();
+    })
+    .then((data) => {
+      // the slice here gives us 8 days of parking information
+      let returnedData = JSON.stringify(data["days"].slice(0,8), null, 2);
+      console.log(returnedData)
+    })
+    .catch((err) => console.error('Error:', err));
   
- 
