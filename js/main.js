@@ -11,8 +11,6 @@ let year = String(today.getFullYear());
 
 
 const parkingURL = `https://api.nyc.gov/public/api/GetCalendar?fromdate=${month}%2F${day}%2F${year}&todate=12%2F31%2F2025`;
-
-
  
 // Parking data
   fetch(parkingURL, {
