@@ -55,7 +55,7 @@ const weatherURL = `https://api.weather.gov/points/40.6863,-73.9641`;
           const forecastURL = data.properties.forecast;
           console.log(`Forecast URL:`, forecastURL)
 
-          // Fetch the forecast data and do something with itt. 
+          // Fetch the forecast data and do something with it. 
           return fetch(forecastURL)
             .then(response => {
               
