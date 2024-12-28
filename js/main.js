@@ -41,7 +41,7 @@ const parkingURL = `https://api.nyc.gov/public/api/GetCalendar?fromdate=${month}
 
 const weatherURL = `https://api.weather.gov/points/40.6863,-73.9641`;
 
-    // Weather data
+    // Weather data below
     fetch(weatherURL)
       .then(response => {
         // check if the response is valid
