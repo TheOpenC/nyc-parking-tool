@@ -68,7 +68,7 @@ const weatherURL = `https://api.weather.gov/points/40.6863,-73.9641`;
           }
         })
         .then(forecastData => {
-              // Handle Forecast Data here
+              // Handle Forecast Data
               const timedForecast = forecastData.properties.periods.map(period => {
                 return {
                   number: period.number,
