@@ -4,7 +4,7 @@
 let today = new Date();
 let dayOfWeek = today.getDay()
 
-// this resolves formatting issues with dates
+// this resolves formatting issues with datess
 let month = String(today.getMonth()+1).padStart(2, '0');
 let day = String(today.getDate()).padStart(2, '0');
 let year = String(today.getFullYear());
