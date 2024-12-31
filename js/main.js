@@ -15,22 +15,23 @@ async function fetchParkingData() {
   const parkingURL = `https://api.nyc.gov/public/api/GetCalendar?fromdate=${month}%2F${day}%2F${year}&todate=12%2F31%2F2025`;
   try {
   // Parking data
-    fetch(parkingURL, {
+    const response = await fetch(parkingURL, {
       method: 'GET',
       headers: {
         'Cache-Control': 'no-cache',
         'Ocp-Apim-Subscription-Key': 'f900a38d921947fa920d239f7931049f'
       }
-    })
-      .then((response) => {
-        if (!response.ok) throw new Error('Failed to fetch Parking API');
-        const data = await response.json();
-        return response.json();
-      })
-      .then((data) => {
-        // the slice here gives us 8 days of parking information
-        let returnedData = data["days"].slice(0,8)
-        const transformedData = returnedData.map(day => {
+    });
+      
+    if (!response.ok) throw new Error('Failed to fetch Parking API');
+    const data = await response.json();
+    console.log('Raw Parking Data:', data);
+    return data;
+
+    // process and transform data 
+    // the slice here gives us 8 days of parking information
+         return data["days"].slice(0,8).map(day => {
+
           //transform the date data here. 
           let pDay = (day.today_id.slice(6, 8)); //parseInt ensures it's an integer
           let pMonth = (day.today_id.slice(4, 6)); // -1 converts the number to zero-based
@@ -44,12 +45,16 @@ async function fetchParkingData() {
             items: day.items[0]
           };
         });
-        JSON.stringify(transformedData, null, 2);
-        console.log(transformedData);
-      })
-      .catch((err) => console.error('Error:', err));
-      return [];
-}
+      } catch(err) {
+         console.error('Error fetching parking data:', err);
+      return null; // return an empty array if the fetch fails.
+      }
+    };
+
+    (async function testParkingAPI(){
+      const parkingData = await fetchParkingData();
+      console.log('Test Output for Parking API:', parkingData);
+    })();
 
 const weatherURL = `https://api.weather.gov/points/40.6863,-73.9641`;
 
@@ -105,7 +110,5 @@ const weatherURL = `https://api.weather.gov/points/40.6863,-73.9641`;
           console.error(`Error fetching weather data:`, err.message);
         });
 
-function fetchParkingData() {
-  const
-}
+
   
