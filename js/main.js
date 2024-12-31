@@ -11,46 +11,45 @@ let year = String(today.getFullYear());
 
 
 
-
-const parkingURL = `https://api.nyc.gov/public/api/GetCalendar?fromdate=${month}%2F${day}%2F${year}&todate=12%2F31%2F2025`;
- 
-// Parking data
-  fetch(parkingURL, {
-    method: 'GET',
-    headers: {
-      'Cache-Control': 'no-cache',
-      'Ocp-Apim-Subscription-Key': 'f900a38d921947fa920d239f7931049f'
-    }
-  })
-    .then((response) => {
-      if (!response.ok) throw new Error('Network response was not ok');
-      return response.json();
+async function fetchParkingData() {
+  const parkingURL = `https://api.nyc.gov/public/api/GetCalendar?fromdate=${month}%2F${day}%2F${year}&todate=12%2F31%2F2025`;
+  try {
+  // Parking data
+    fetch(parkingURL, {
+      method: 'GET',
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Ocp-Apim-Subscription-Key': 'f900a38d921947fa920d239f7931049f'
+      }
     })
-    .then((data) => {
-      // the slice here gives us 8 days of parking information
-      // it would be good to come up with a way to change the date number string into just a day of the week + month/day/year
+      .then((response) => {
+        if (!response.ok) throw new Error('Failed to fetch Parking API');
+        const data = await response.json();
+        return response.json();
+      })
+      .then((data) => {
+        // the slice here gives us 8 days of parking information
+        let returnedData = data["days"].slice(0,8)
+        const transformedData = returnedData.map(day => {
+          //transform the date data here. 
+          let pDay = (day.today_id.slice(6, 8)); //parseInt ensures it's an integer
+          let pMonth = (day.today_id.slice(4, 6)); // -1 converts the number to zero-based
+          let pYear = (day.today_id.slice(0, 4));
+          // create a new Date object
+          let pFormatted = new Date(pYear, pMonth, pDay)
 
-
-      let returnedData = data["days"].slice(0,8)
-      const transformedData = returnedData.map(day => {
-        //transform the date data here. 
-        let pDay = (day.today_id.slice(6, 8)); //parseInt ensures it's an integer
-        let pMonth = (day.today_id.slice(4, 6)); // -1 converts the number to zero-based
-        let pYear = (day.today_id.slice(0, 4));
-        // create a new Date object
-        let pFormatted = new Date(pYear, pMonth, pDay)
-
-        return {
-          dateFormat: day.today_id,  //20241230 YearMonthDay
-          day: pFormatted.toLocaleDateString('en-US', {weekday: 'long', month: 'short', day: 'numeric', year: 'numeric'}),
-          items: day.items[0]
-        };
-      });
-      JSON.stringify(transformedData, null, 2);
-      console.log(transformedData);
-    })
-    .catch((err) => console.error('Error:', err));
-
+          return {
+            dateFormat: day.today_id,  //20241230 YearMonthDay
+            day: pFormatted.toLocaleDateString('en-US', {weekday: 'long', month: 'short', day: 'numeric', year: 'numeric'}),
+            items: day.items[0]
+          };
+        });
+        JSON.stringify(transformedData, null, 2);
+        console.log(transformedData);
+      })
+      .catch((err) => console.error('Error:', err));
+      return [];
+}
 
 const weatherURL = `https://api.weather.gov/points/40.6863,-73.9641`;
 
@@ -106,9 +105,7 @@ const weatherURL = `https://api.weather.gov/points/40.6863,-73.9641`;
           console.error(`Error fetching weather data:`, err.message);
         });
 
-class Day {
-  yearMonthDay: 
-
+function fetchParkingData() {
+  const
 }
-
   
