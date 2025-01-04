@@ -22,95 +22,133 @@ async function fetchParkingData() {
         'Ocp-Apim-Subscription-Key': 'f900a38d921947fa920d239f7931049f'
       }
     });
+    // check if the response is OK
     if (!response.ok) throw new Error('Failed to fetch Parking API');
+    
+    // Parse the JSON response
     const data = await response.json();
 
-    // process and transform data 
-    // the slice here gives us 8 days of parking information
-         return data["days"].slice(0,8).map(day => {
-
-          //transform the date data here. 
-          let pDay = (day.today_id.slice(6, 8));
-          let pMonth = (day.today_id.slice(4, 6), 0); // 0 converts the number to zero-based
-          let pYear = (day.today_id.slice(0, 4));
-          // create a new Date object
-          let pFormatted = new Date(pYear, pMonth, pDay)
-
-          return {
-            dateFormat: day.today_id,  //20241230 YearMonthDay
-            day: pFormatted.toLocaleDateString('en-US', {weekday: 'long', month: 'short', day: 'numeric', year: 'numeric'}),
-            parking: day.items[0]
-          };
-        });
+    
+    // transform and return: the slice gives us 8 days of parking information
+        return data["days"].slice(0,8).map(day => transformParkingDay(day));
       } catch(err) {
-         console.error('Error fetching parking data:', err);
-      return null; // return an empty array if the fetch fails.
+        console.error('Error fetching parking data:', err);
+        
+        // return null if there's an error
+        return null;
       }
-    };
+}
+
+function transformParkingDay(day) {
+  //transform the date data here. 
+  const pDay = parseInt(day.today_id.slice(6, 8), 10); //parseInt ensures an integer is returned
+  const pMonth = parseInt(day.today_id.slice(4, 6), 10) - 1; //subtract by 1 because the month is 0 based.
+  const pYear = parseInt(day.today_id.slice(0, 4), 10);
+  // create a new Date object
+  const pFormatted = new Date(pYear, pMonth , pDay);
+
+  // Return a structured object with transformed data
+  return {
+    dateFormat: day.today_id,  //20241230 YYYYMMDD
+    day: pFormatted.toLocaleDateString('en-US', {
+      weekday: 'long', 
+      month: 'short', 
+      day: 'numeric', 
+      year: 'numeric'
+    }),
+    parking: day.items[0]
+  };
+}
 
 
-    // Modular fetch function for Parking
-    (async function testParkingAPI(){
-      const parkingData = await fetchParkingData();
-      console.log('Output for Parking API:', parkingData);
-    })();
+// test the parking data fetch and transformation
+(async function testParkingAPI() {
+  const parkingData = await fetchParkingData();
+  if (parkingData) {
+    console.log('Transformed Parking Data:', parkingData);
+
+    // Log the first entry for clarity
+    if (parkingData.length > 0) {
+      console.log('First Transformed Parking Entry:', parkingData[0]);
+    }
+  } else {
+    console.log('No parking data returned.');
+  }
+})();
 
 
+//initial weather data fetch
+async function fetchForecastData(){  
+  const weatherURL = `https://api.weather.gov/points/40.6863,-73.9641`;
+  try {
+      // Weather data below
+      const response = await fetch(weatherURL);
+        
+          // check if the response is valid
+      if (!response.ok) throw new Error(`Failed to fetch Weather API`);
+          
+      // Parse the JSON response body
+      const data = await response.json();    
+      //console.log(data.properties) - Additional raw weather info. Save for testing
 
-const weatherURL = `https://api.weather.gov/points/40.6863,-73.9641`;
+      // extract the forecast URL
+      const forecastURL = data.properties.forecast;
+      if (!forecastURL) throw new Error('Forecast URL not found in Weather API response')
+          
+      // Make an API request to the Forecast URL 
+      const forecastResponse = await fetch(forecastURL);
+      //console.log(`Forecast URL:`, forecastURL) -- this is the raw weather info. Save for testing.
 
-    // Weather data below
-    fetch(weatherURL)
-      .then(response => {
-        // check if the response is valid
-        if (!response.ok) throw new Error(`HTTP Error! status: ${response.status}`);
-        return response.json();
+      //check if the forecast response is OK
+      if (!forecastResponse.ok) throw new Error(`Failed to fetch Forecast API`);
+
+
+      // Parse the JSON response 
+      const forecastData = await forecastResponse.json();
+          
+
+      // Transform and return the weather data
+      return forecastData.properties.periods.map(period => {
+        const dateFormat = period.startTime.slice(0, 10).replace(/-/g, ''); // replace `-` with nospace. /g (flag 'g') says all instances
+        return {
+          
+        }
       })
-      .then(data => {
-        //console.log(data.properties) - Additional raw weather info. Save for testing
 
-        // check if 'properties' exist and log the Forecast URL
-        if (data.properties && data.properties.forecast) {
-          const forecastURL = data.properties.forecast;
-          //console.log(`Forecast URL:`, forecastURL) -- this is the raw weather info. Save for testing.
 
-          // Fetch the forecast data and do something with it. 
-          return fetch(forecastURL)
-            .then(response => {
-              
-              // check if the response is valid
-              if (!response.ok) throw new Error(`HTTP Error! status: ${response.status}`);
-              return response.json();
-            });
-          } else {
-            throw new Error(`Forecast URL not found in properties.`)
-          }
-        })
-        .then(forecastData => {
-              // Handle Forecast Data
-              const timedForecast = forecastData.properties.periods.map(period => {
-                
-                //date format follows:  startTime: '2025-01-06T06:00:00-05:00'
-                let wDay = period.startTime.slice(8,10)
-                let wMonth = period.startTime.slice(5,7)
-                let wYear = period.startTime.slice(0,4)
-                let wFormatted = wYear+wMonth+wDay // this formats the forecast date the same way as the parking date 
-                return {
-                  dateFormat: wFormatted,
-                  //rawData: period,
-                  period: period.number,
-                  day: `${period.name}, ${period.temperature}°F`,
-                  //temp: `${period.temperature}°F`,
-                  forecast: period.detailedForecast
-                }
-              })
-              JSON.stringify(timedForecast, null, 2);
-              console.log(timedForecast);
-        })
-       // errors 
-        .catch(err => {
-          console.error(`Error fetching weather data:`, err.message);
-        });
 
+          .then(forecastData => {
+                // Handle Forecast Data
+                const timedForecast = forecastData.properties.periods.map(period => {
+
+                  //date format follows:  startTime: '2025-01-06T06:00:00-05:00'
+                  let wDay = period.startTime.slice(8,10)
+                  let wMonth = period.startTime.slice(5,7)
+                  let wYear = period.startTime.slice(0,4)
+                  let wFormatted = wYear+wMonth+wDay // this formats the forecast date the same way as the parking date 
+                  return {
+                    dateFormat: wFormatted,
+                    //rawData: period, // includes parking, school and sanitation info
+                    period: period.number,
+                    day: `${period.name}, ${period.temperature}°F`,
+                    forecast: period.detailedForecast
+                  }
+                })
+                JSON.stringify(timedForecast, null, 2);
+                console.log(timedForecast);
+          })
+   // errors 
+  }         catch(err) {
+            console.error(`Error fetching weather data:`, err);
+          
+            return null;
+          };
+};        
+
+// Modular fetch function for Forecasts
+(async function testForecastAPI(){
+  const forecastData = await fetchForecastData();
+  console.log('Output for Forecast API:', forecastData);
+})();
 
   
