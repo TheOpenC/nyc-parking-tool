@@ -70,7 +70,7 @@ function transformParkingDay(day) {
 // })();
 
 
-//Fetch Weather Data from 311 API
+//Fetch Weather Data from NWS API
 async function fetchForecastData(){  
   const weatherURL = `https://api.weather.gov/points/40.6863,-73.9641`;
   try {
@@ -90,21 +90,23 @@ async function fetchForecastData(){
           
       // Make an API request to the Forecast URL 
       const forecastResponse = await fetch(forecastURL);
-      //console.log(`Forecast URL:`, forecastURL) -- this is the raw weather info. Save for testing.
+      //console.log(`Forecast URL:`, forecastURL) //-- this is the forecast URL. Save for testing.
 
       //Check if the forecast response is OK
       if (!forecastResponse.ok) throw new Error(`Failed to fetch Forecast API`);
 
       // Parse the JSON response 
       const forecastData = await forecastResponse.json();
-          
+          console.log(forecastData.properties)
       // Transform and return the weather data
       return forecastData.properties.periods.map(period => {
         const dateFormat = period.startTime.slice(0, 10).replace(/-/g, ''); // replace `-` with nospace. /g (flag 'g') says all instances
         return {
           dateFormat: dateFormat, //YYYYMMDD
           period: period.name, //time of day
+          daytime: period.isDaytime, //Morning or Night
           temperature: `${period.temperature}°F`,
+          //precipitation: period.probabilityOfPrecipitation,
           forecast: period.detailedForecast 
         };
       });
@@ -132,7 +134,7 @@ async function fetchForecastData(){
   // Combine the Parking and Weather Data
   //
   // ***********************
-async function combineData() {
+async function combineForecastAndParkingData() {
   try {
     // step 1. Fetch parking and weather data
     const parkingData = await fetchParkingData();
@@ -146,21 +148,26 @@ async function combineData() {
     const combinedData = parkingData.map(pDay => {
       // Match parking day with weather forecasts using dateFormat
       const matchingForecast = forecastData.filter(wDay => wDay.dateFormat === pDay.dateFormat);
-
+      //console.log('Matching Forecast:',matchingForecast)
       // Separate morning and evening forecasts
-      const morningForecast = matchingForecast.find(weather => weather.period.includes("Morning"));
-      const eveningForecast = matchingForecast.find(weather => weather.period.includes("Evening"));
+      const morningForecast = matchingForecast[0]
+      //console.log(`morning`, morningForecast)
+      const eveningForecast = matchingForecast[1]
+      //console.log(`evening:`, eveningForecast)
+      
 
       return {
-        dateFormat: pDay.dateFormat, //shared date format weather / parking
-        day: pDay.day, // calendar date
+        //dateFormat: pDay.dateFormat, //YYYYMMDD
+        day: pDay.day, // Human calendar date
         parking: pDay.parking, // parking restriction info
-        morningForecast: morningForecast ? morningForecast.forecast : 'No morning forecast available', // Morning weather
-        eveningForecast: eveningForecast ? eveningForecast.forecast : 'No evening forecast available', // Evening weather
-      };
-    });
+        forecast: {
+          morning: [period, morningForecast[3], morningForecast[4]],
+          evening: [eveningForecast[1], eveningForecast[3], eveningForecast[4]]
+      }};
+        
+      });
 
-    console.log('Combined Data:', combinedData); // Log the combined dataset
+    //console.log('Combined Data:', combinedData); // Log the combined dataset
     return combinedData; 
   } catch (err) {
     // Step 3: Handle any errors
@@ -169,11 +176,13 @@ async function combineData() {
   }
 }
 
-(async function testCombinedData() {
-  const combinedData = await combineData();
+   (async function testCombinedData() {
+  const combinedData = await combineForecastAndParkingData();
   if (combinedData) {
-    console.log('Final Combined Data:', combinedData);
+    console.log(`Final Combined Data:`, JSON.stringify(combinedData, null, 2));
   } else {
     console.log('Failed to combine parking and weather data.');
   }
 })();
+
+
