@@ -11,7 +11,7 @@ let year = String(today.getFullYear()); //YYYY
 
 //Fetch Parking data from 311 API
 async function fetchParkingData() {
-  const parkingURL = `https://api.nyc.gov/public/api/GetCalendar?fromdate=${month}%2F${day}%2F${year}&todate=12%2F31%2F2025`;
+  const parkingURL = `https://api.nyc.gov/public/api/GetCalendar?fromdate=${month}%2F${day}%2F${year}&todate=${+month + 1}%2F${day}%2F${year}`;
   try {
   // Parking data
     const response = await fetch(parkingURL, {
@@ -60,14 +60,14 @@ function transformParkingDay(day) {
 
 
 // Test the parking data fetch and transformation
-(async function testParkingAPI() {
-  const parkingData = await fetchParkingData();
-  if (parkingData) {
-    console.log('Transformed Parking Data:', parkingData);
-  } else {
-    console.log('No parking data returned.');
-  }
-})();
+// (async function testParkingAPI() {
+//   const parkingData = await fetchParkingData();
+//   if (parkingData) {
+//     console.log('Transformed Parking Data:', parkingData);
+//   } else {
+//     console.log('No parking data returned.');
+//   }
+// })();
 
 
 //Fetch Weather Data from 311 API
@@ -104,7 +104,7 @@ async function fetchForecastData(){
         return {
           dateFormat: dateFormat, //YYYYMMDD
           period: period.name, //time of day
-          termperature: `${period.temperature}°F`,
+          temperature: `${period.temperature}°F`,
           forecast: period.detailedForecast 
         };
       });
@@ -118,13 +118,62 @@ async function fetchForecastData(){
   }   
 
 // Test the Weather Data Fetch Function
-(async function testForecastAPI() {
-  const forecastData = await fetchForecastData();
-  if (forecastData) {
-    console.log('Output for Forecast API:', forecastData);
+// (async function testForecastAPI() {
+//   const forecastData = await fetchForecastData();
+//   if (forecastData) {
+//     console.log('Output for Forecast API:', forecastData);
+//   } else {
+//     console.log('No Weather data returned.');
+//   }
+// })();
+
+  // ***********************
+  //
+  // Combine the Parking and Weather Data
+  //
+  // ***********************
+async function combineData() {
+  try {
+    // step 1. Fetch parking and weather data
+    const parkingData = await fetchParkingData();
+    const forecastData = await fetchForecastData();
+
+    if (!parkingData || !forecastData) {
+      throw new Error('Failed to fetch one or both datasets')
+    } 
+
+    // Step 2, combine the data
+    const combinedData = parkingData.map(pDay => {
+      // Match parking day with weather forecasts using dateFormat
+      const matchingForecast = forecastData.filter(wDay => wDay.dateFormat === pDay.dateFormat);
+
+      // Separate morning and evening forecasts
+      const morningForecast = matchingForecast.find(weather => weather.period.includes("Morning"));
+      const eveningForecast = matchingForecast.find(weather => weather.period.includes("Evening"));
+
+      return {
+        dateFormat: pDay.dateFormat, //shared date format weather / parking
+        day: pDay.day, // calendar date
+        parking: pDay.parking, // parking restriction info
+        morningForecast: morningForecast ? morningForecast.forecast : 'No morning forecast available', // Morning weather
+        eveningForecast: eveningForecast ? eveningForecast.forecast : 'No evening forecast available', // Evening weather
+      };
+    });
+
+    console.log('Combined Data:', combinedData); // Log the combined dataset
+    return combinedData; 
+  } catch (err) {
+    // Step 3: Handle any errors
+    console.error('Error combining data:', err);
+    return null;
+  }
+}
+
+(async function testCombinedData() {
+  const combinedData = await combineData();
+  if (combinedData) {
+    console.log('Final Combined Data:', combinedData);
   } else {
-    console.log('No Weather data returned.');
+    console.log('Failed to combine parking and weather data.');
   }
 })();
-
-  
