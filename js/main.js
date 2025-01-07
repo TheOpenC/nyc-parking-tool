@@ -97,17 +97,19 @@ async function fetchForecastData(){
 
       // Parse the JSON response 
       const forecastData = await forecastResponse.json();
-          console.log(forecastData.properties)
+          //console.log(forecastData.properties)
       // Transform and return the weather data
       return forecastData.properties.periods.map(period => {
         const dateFormat = period.startTime.slice(0, 10).replace(/-/g, ''); // replace `-` with nospace. /g (flag 'g') says all instances
         return {
           dateFormat: dateFormat, //YYYYMMDD
-          period: period.name, //time of day
-          daytime: period.isDaytime, //Morning or Night
-          temperature: `${period.temperature}°F`,
-          //precipitation: period.probabilityOfPrecipitation,
-          forecast: period.detailedForecast 
+          period: period
+          // period: period.name, //time of day
+          // daytime: period.isDaytime, //Morning or Night
+          // temperature: `${period.temperature}°F`,
+          // //precipitation: period.probabilityOfPrecipitation,
+          // forecast: period.detailedForecast 
+          
         };
       });
     } catch (err) {
@@ -134,7 +136,7 @@ async function fetchForecastData(){
   // Combine the Parking and Weather Data
   //
   // ***********************
-async function combineForecastAndParkingData() {
+(async function combineForecastAndParkingData() {
   try {
     // step 1. Fetch parking and weather data
     const parkingData = await fetchParkingData();
@@ -148,24 +150,31 @@ async function combineForecastAndParkingData() {
     const combinedData = parkingData.map(pDay => {
       // Match parking day with weather forecasts using dateFormat
       const matchingForecast = forecastData.filter(wDay => wDay.dateFormat === pDay.dateFormat);
-      //console.log('Matching Forecast:',matchingForecast)
+      
       // Separate morning and evening forecasts
       const morningForecast = matchingForecast[0]
-      //console.log(`morning`, morningForecast)
       const eveningForecast = matchingForecast[1]
-      //console.log(`evening:`, eveningForecast)
       
+      console.log(`Matched Data:`, console.dir({
+        day: pDay.day,
+        parking: pDay.parking,
+        weather: {
+          morning: morningForecast,
+          evening: eveningForecast
+        }
+      }, {depth: 5}))
 
       return {
         //dateFormat: pDay.dateFormat, //YYYYMMDD
         day: pDay.day, // Human calendar date
         parking: pDay.parking, // parking restriction info
-        forecast: {
-          morning: [period, morningForecast[3], morningForecast[4]],
-          evening: [eveningForecast[1], eveningForecast[3], eveningForecast[4]]
-      }};
+        weather: {
+          morning: morningForecast,
+          evening: eveningForecast
+        }
+      };
         
-      });
+    });
 
     //console.log('Combined Data:', combinedData); // Log the combined dataset
     return combinedData; 
@@ -174,15 +183,15 @@ async function combineForecastAndParkingData() {
     console.error('Error combining data:', err);
     return null;
   }
-}
-
-   (async function testCombinedData() {
-  const combinedData = await combineForecastAndParkingData();
-  if (combinedData) {
-    console.log(`Final Combined Data:`, JSON.stringify(combinedData, null, 2));
-  } else {
-    console.log('Failed to combine parking and weather data.');
-  }
 })();
+
+//    (async function testCombinedData() {
+//   const combinedData = await combineForecastAndParkingData();
+//   if (combinedData) {
+//     console.log(`Final Combined Data:`, combinedData ); //JSON.stringify(combinedData, null, 2)
+//   } else {
+//     console.log('Failed to combine parking and weather data.');
+//   }
+// })();
 
 
