@@ -58,18 +58,6 @@ function transformParkingDay(day) {
   };
 }
 
-
-// Test the parking data fetch and transformation
-// (async function testParkingAPI() {
-//   const parkingData = await fetchParkingData();
-//   if (parkingData) {
-//     console.log('Transformed Parking Data:', parkingData);
-//   } else {
-//     console.log('No parking data returned.');
-//   }
-// })();
-
-
 //Fetch Weather Data from NWS API
 async function fetchForecastData(){  
   const weatherURL = `https://api.weather.gov/points/40.6863,-73.9641`;
@@ -97,19 +85,13 @@ async function fetchForecastData(){
 
       // Parse the JSON response 
       const forecastData = await forecastResponse.json();
-          //console.log(forecastData.properties)
+
       // Transform and return the weather data
       return forecastData.properties.periods.map(period => {
         const dateFormat = period.startTime.slice(0, 10).replace(/-/g, ''); // replace `-` with nospace. /g (flag 'g') says all instances
         return {
           dateFormat: dateFormat, //YYYYMMDD
           period: period
-          // period: period.name, //time of day
-          // daytime: period.isDaytime, //Morning or Night
-          // temperature: `${period.temperature}°F`,
-          // //precipitation: period.probabilityOfPrecipitation,
-          // forecast: period.detailedForecast 
-          
         };
       });
     } catch (err) {
@@ -120,16 +102,6 @@ async function fetchForecastData(){
       return null;
     } 
   }   
-
-// Test the Weather Data Fetch Function
-// (async function testForecastAPI() {
-//   const forecastData = await fetchForecastData();
-//   if (forecastData) {
-//     console.log('Output for Forecast API:', forecastData);
-//   } else {
-//     console.log('No Weather data returned.');
-//   }
-// })();
 
   // ***********************
   //
@@ -147,37 +119,12 @@ async function fetchForecastData(){
     } 
 
     // Step 2, combine the data
-    const combinedData = parkingData.map(pDay => {
-      // Match parking day with weather forecasts using dateFormat
-      const matchingForecast = forecastData.filter(wDay => wDay.dateFormat === pDay.dateFormat);
-      
-      // Separate morning and evening forecasts
-      const morningForecast = matchingForecast[0]
-      const eveningForecast = matchingForecast[1]
-      
-      console.log(`Matched Data:`, console.dir({
-        day: pDay.day,
-        parking: pDay.parking,
-        weather: {
-          morning: morningForecast,
-          evening: eveningForecast
-        }
-      }, {depth: 5}))
+    const aDayofData = combinePW(parkingData, forecastData);
+  
+    // Console Log the combined data
+    console.dir(aDayofData, {depth: 5});
 
-      return {
-        //dateFormat: pDay.dateFormat, //YYYYMMDD
-        day: pDay.day, // Human calendar date
-        parking: pDay.parking, // parking restriction info
-        weather: {
-          morning: morningForecast,
-          evening: eveningForecast
-        }
-      };
-        
-    });
-
-    //console.log('Combined Data:', combinedData); // Log the combined dataset
-    return combinedData; 
+    return aDayofData; 
   } catch (err) {
     // Step 3: Handle any errors
     console.error('Error combining data:', err);
@@ -185,13 +132,25 @@ async function fetchForecastData(){
   }
 })();
 
-//    (async function testCombinedData() {
-//   const combinedData = await combineForecastAndParkingData();
-//   if (combinedData) {
-//     console.log(`Final Combined Data:`, combinedData ); //JSON.stringify(combinedData, null, 2)
-//   } else {
-//     console.log('Failed to combine parking and weather data.');
-//   }
-// })();
+// Create a day of Data
+function combinePW (parkingData, forecastData) {
+  return parkingData.map(pDay => {
+    //dateFormat: pDay.dateFormat, //YYYYMMDD
+    const matchingForecast = forecastData.filter(wDay => wDay.dateFormat === pDay.dateFormat);
+    const morningForecast = matchingForecast[0];
+    const eveningForecast = matchingForecast[1];
+
+    // Returns structured object
+    return {
+      day: pDay.day,
+      parking: pDay.parking,
+      weather: {
+        morning: morningForecast,
+        evening: eveningForecast,
+      }
+    };
+  });
+}
+
 
 
