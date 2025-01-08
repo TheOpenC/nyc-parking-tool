@@ -12,18 +12,33 @@
 		<link rel="stylesheet" href="css/style.css">
 	</head>
 	<body>
+		<header>
 
-		<h1></h1>
-		<input type="text" name="" value="">
-		<button type="button" name="button">location</button>
+		</header>
+		<section class="parameter-container">
+			<h1></h1>
+			<input type="text" name="" value="">
+			<button type="button" name="button">location</button>
+		</section>
 
-		<h2></h2>
-		<img src="img/graphic.png" alt="">
-		<h3>car</h3>
+		<section class="data-container">
+			<h3>Parking</h3>
+				<p id="parking">api info</p>
+			
+			<h3>Morning Forecast</h3>
+				<p id="morningF">api info</p>
+			<h3>Evening Forecast</h3>
+				<p id="eveningF">api info</p>
 
+			<img src="" alt="">
+			<h3></h3>
+		</section>
 		<!-- include an api that finds the image of your make and model and use localstorage to save the user's preferences for return visits. -->
 
-		
+		<script src="api.js"></script>
+		<script src="combine.js"></script>
+		<script src="dom.js"></script>
+		<script src="notifications.js"></script>
 		<script type="text/javascript" src="js/main.js"></script>
 	</body>
 </html>

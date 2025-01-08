@@ -104,7 +104,7 @@ async function fetchForecastData(){
   }   
 
   // ***********************
-  //
+  // IIFE immediately invoked function expression
   // Combine the Parking and Weather Data
   //
   // ***********************
