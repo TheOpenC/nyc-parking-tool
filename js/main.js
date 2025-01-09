@@ -1,4 +1,6 @@
 
+
+
 // Date info for parking API
 let today = new Date();
 let dayOfWeek = today.getDay()
@@ -154,3 +156,4 @@ function combinePW (parkingData, forecastData) {
 
 
 
+export {today, month, day, year, fetchParkingData, transformParkingDay, fetchForecastData, combineForecastAndParkingData, combinePW};
