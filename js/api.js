@@ -1,5 +1,14 @@
+// Date info for parking API
+let today = new Date();
+let dayOfWeek = today.getDay()
 
-async function fetchParkingData(){
+// this resolves formatting issues with dates
+let month = String(today.getMonth()+1).padStart(2, '0'); //MM
+let day = String(today.getDate()).padStart(2, '0'); //DD
+let year = String(today.getFullYear()); //YYYY
+
+
+export async function fetchParkingData(){
     const parkingURL = `https://api.nyc.gov/public/api/GetCalendar?fromdate=${month}%2F${day}%2F${year}&todate=${+month + 1}%2F${day}%2F${year}`;
 
     try {
@@ -11,7 +20,8 @@ async function fetchParkingData(){
               }
         });
         if (!response.ok) throw new Error('Problem fetching parking data.')
-            
+        
+        //Parse the JSON response
         const data = await response.json();
 
         return data.days.slice(0,8).map(day => {
@@ -31,10 +41,7 @@ async function fetchParkingData(){
                 }),
                 parking: day.items[0] // Parking restriction info
               };
-
-            
         })
-
        
     } catch (err) {
         console.log("Error in fetchParkingData", err);
@@ -49,3 +56,35 @@ fetchParkingData().then(data => {
         console.log("No parking data returned");
     }
 });
+
+
+export async function fetchForecastData() {
+    const weatherURL = `https://api.weather.gov/points/40.6863,-73.9641`;
+    try {
+        const response = await fetch(weatherURL);
+        if(!response.ok) throw new Error("Failed to fetch Weather API");
+
+        const data = await response.json();
+
+        const forecastURL = data.properties.forecast;
+        if(!forecastURL) throw new Error("Forecast URL not found in Weather API")
+        
+        const forecastResponse = await fetch(forecastURL);
+        if (!forecastResponse) throw new Error("Failed to fetch Forecast API")
+        
+        const forecastData = await forecastResponse.json();
+
+        return forecastData.properties.periods.map(period => {
+            const dateFormat = period.startTime.slice(0, 10). replace(/-/g, "");
+           
+            return {
+                dateFormat: dateFormat,
+                period: period,
+            };
+        });
+    } catch (err){
+        console.err('Error fetching weather data', err);
+        // if an error, return null so the program keeps running.
+        return null;
+    }
+} 
