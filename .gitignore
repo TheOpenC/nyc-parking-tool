@@ -3,4 +3,4 @@ SoulseekQt/
 .bash*
 .config/
 .cache/
-
+node_modules/
