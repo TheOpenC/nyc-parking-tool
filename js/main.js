@@ -5,6 +5,7 @@ async function testAPIs(){
   const parkingData = await fetchParkingData();
   const forecastData = await fetchForecastData();
   console.log('Parking Data:', parkingData);
+  
   console.log('Forecast Data:', forecastData);
 }
 

@@ -1,16 +1,22 @@
-// Date info for parking API
-let today = new Date();
-let dayOfWeek = today.getDay()
 
+//api.js
+
+
+
+// Date info for parking API
 // this resolves formatting issues with dates
+let today = new Date();
 let month = String(today.getMonth()+1).padStart(2, '0'); //MM
 let day = String(today.getDate()).padStart(2, '0'); //DD
 let year = String(today.getFullYear()); //YYYY
 
+const proxy = 'https://proxy.cors.sh/'
+
 
 export async function fetchParkingData(){
-    const parkingURL = `https://api.nyc.gov/public/api/GetCalendar?fromdate=${month}%2F${day}%2F${year}&todate=${+month + 1}%2F${day}%2F${year}`;
-
+    
+    const parkingURL = `${proxy}https://api.nyc.gov/public/api/GetCalendar?fromdate=${month}%2F${day}%2F${year}&todate=${+month + 1}%2F${day}%2F${year}`;
+   
     try {
         const response = await fetch(parkingURL, {
             method: 'GET',
@@ -19,12 +25,15 @@ export async function fetchParkingData(){
                 'Ocp-Apim-Subscription-Key': 'f900a38d921947fa920d239f7931049f'
               }
         });
+        
         if (!response.ok) throw new Error('Problem fetching parking data.')
         
         //Parse the JSON response
-        const data = await response.json();
+        const responseText = await response.text();
+        console.log('Parking response text:', responseText)
+        const data = JSON.parse(responseText);
 
-        return data.days.slice(0,8).map(day => {
+        return data.days.slice(0,8).map((day) => {
             const pDay = parseInt(day.today_id.slice(6, 8), 10); //parseInt ensures int / DD
             const pMonth = parseInt(day.today_id.slice(4, 6), 10) - 1; // -1 for 0 based months. MM
             const pYear = parseInt(day.today_id.slice(0, 4), 10); // YYYY
@@ -65,7 +74,6 @@ export async function fetchForecastData() {
         if(!response.ok) throw new Error("Failed to fetch Weather API");
 
         const data = await response.json();
-
         const forecastURL = data.properties.forecast;
         if(!forecastURL) throw new Error("Forecast URL not found in Weather API")
         
@@ -88,3 +96,4 @@ export async function fetchForecastData() {
         return null;
     }
 } 
+
