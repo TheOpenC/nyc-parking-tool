@@ -15,7 +15,7 @@ const proxy = 'https://proxy.cors.sh/'
 
 export async function fetchParkingData(){
     
-    const parkingURL = `${proxy}https://api.nyc.gov/public/api/GetCalendar?fromdate=${month}%2F${day}%2F${year}&todate=${+month + 1}%2F${day}%2F${year}`;
+    const parkingURL = `$https://api.nyc.gov/public/api/GetCalendar?fromdate=${month}%2F${day}%2F${year}&todate=${+month + 1}%2F${day}%2F${year}`;
    
     try {
         const response = await fetch(parkingURL, {

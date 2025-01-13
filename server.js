@@ -1,23 +1,41 @@
-// const express = require('express'); // Import Express
-// const bodyParser = require('body-parser'); // Import body-parser middleware
-// const app = express(); // create an instance fo the express application
+const express = require('express'); // Import Express
+const fetch = require("node-fetch");
+const app = express();
 
-// const { fetchParkingData } = require('./js/api'); //Import fetchParkingData
+const PORT = 3000;
 
-// app.get('/api/parking', async (req, res) => {
-//     try {
-//         const parkingData = await fetchParkingData();
-//         if (!parkingData) {
-//             res.status(500).json({error: "Failed to fetch parking data"});
-//         } else {
-//             res.json(parkingData);
-//         }
-//     } catch (err){
-//         res.status(500).json({error: err.message });
-//     }
-// });
+//simple route to proxy requests to the parking api
 
-// const PORT = 3000 // define the port number
-// app.listen(PORT, () => {
-//     console.log(`Server running on http://localhost:${PORT}`);
-// })
+app.get("/api/parking", async (req, res) => {
+const today = new Date()    
+const month = String(today.getMonth()+ 1).padStart(2, "0");
+const day = String(today.getDate()).padStart(2, "0");
+const year = String(today.getFullYear());
+
+const parkingURL = `https://api.nyc.gov/public/api/GetCalendar?fromdate=${month}%2F${day}%2F${year}&todate=${+month + 1}%2F${day}%2F${year}`
+
+try {
+    const response = await fetch(parkingURL, {
+        method: "GET",
+        headers: {
+            'Cache-Control': 'no-cache',
+            'Ocp-Apim-Subscription-Key': 'f900a38d921947fa920d239f7931049f'
+        },
+    });
+
+    if (!response.ok) {
+        return res.status(response.status).json({error: "Failed to fetch Parking API"});
+    }
+
+    const data = await response.json();
+    res.json(data);
+} catch(err){
+    console.error("Error fetching parking data", err);
+    res.status(500).json({error: "internal service error"});
+}
+});
+
+// start the server
+app.listen(PORT, () => {
+    console.log(`Proxy server running at http://localhost:${PORT}`)
+});
