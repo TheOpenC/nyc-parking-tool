@@ -1,8 +1,6 @@
 
 //api.js
 
-
-
 // Date info for parking API
 // this resolves formatting issues with dates
 let today = new Date();
@@ -15,7 +13,7 @@ export async function fetchParkingData() {
     const parkingURL = "http://localhost:3001/api/parking"; // local proxy server
    
     try {
-        console.log(`Fetching parking data from: ${parkingURL}`);
+        //console.log(`Fetching parking data from: ${parkingURL}`); fetches from "http://localhost:3001/api/parking"
         const response = await fetch(parkingURL);
 
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);

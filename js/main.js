@@ -2,21 +2,22 @@ import { fetchForecastData, fetchParkingData } from "./api.js";
 import {combineForecastAndParkingData} from "./combine.js";
 
 (async function testAPIs(){
-  const parkingData = await fetchParkingData();
-  const forecastData = await fetchForecastData();
-  const combinedData = combineForecastAndParkingData();
+  //const parkingData = await fetchParkingData();
+  //const forecastData = await fetchForecastData();
+  const combinedData = await combineForecastAndParkingData();
 
   // console.log('Parking Data from main.js:', parkingData);
   // console.log('Forecast Data from main.js:', forecastData);
   if (combinedData) {
-    document.querySelector("#combined").textContent = JSON.stringify(combinedData, null, 2);
+    document.querySelector("#combinedData").textContent = JSON.stringify(combinedData, null, 2);
   }
+  console.log(combinedData)
 
-  if (parkingData) {
-    document.querySelector("#parking").textContent = JSON.stringify(parkingData, null, 2);
-  } else {
-    document.querySelector("#parking").textContent = "No parking data available";
-  }
+  // if (parkingData) {
+  //   document.querySelector("#parking").textContent = JSON.stringify(parkingData, null, 2);
+  // } else {
+  //   document.querySelector("#parking").textContent = "No parking data available";
+  // }
 })();
 
 

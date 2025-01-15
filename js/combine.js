@@ -3,7 +3,7 @@ import { fetchForecastData, fetchParkingData } from "./api.js"
 
 export async function combineForecastAndParkingData() {
           try {
-            // step 1. Fetch parking and weather data
+            //Fetch parking and weather data
             const parkingData = await fetchParkingData();
             const forecastData = await fetchForecastData();
         
@@ -13,11 +13,10 @@ export async function combineForecastAndParkingData() {
         
             // Step 2, combine the data
             const aDayofData = dayDataCombiner(parkingData, forecastData);
-          
-            // Console Log the combined data
-            console.dir(dayDataCombiner, {depth: 5});
+            
+            //log the combined data
+            return aDayofData;
         
-            return aDayofData; 
           } catch (err) {
             // Step 3: Handle any errors
             console.error('Error combining data:', err);
@@ -39,7 +38,7 @@ export async function combineForecastAndParkingData() {
               parking: pDay.parking,
               weather: {
                 morning: morningForecast,
-                evening: eveningForecast,
+                evening: eveningForecast
               }
             };
           });
