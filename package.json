@@ -1,9 +1,32 @@
 {
+  "name": "nyc-parking-weather-tool",
+  "version": "1.0.0",
+  "description": "Returns a day of NYC ASP Data and the Morning and Evening Forecast",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=7.6.0",
+    "npm": ">=4.1.2"
+  },
+  "author": "Drew Dudak",
+  "license": "ISC",
   "dependencies": {
     "body-parser": "^1.20.3",
-    "express": "^4.21.2"
-  },
-  "devDependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "node-fetch": "^3.3.2",
     "nodemon": "^3.1.9"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheOpenC/nyc-parking-tool.git"
+  },
+  "bugs": {
+    "url": "https://github.com/TheOpenC/nyc-parking-tool/issues"
+  },
+  "homepage": "https://github.com/TheOpenC/nyc-parking-tool/Readme.txt"
 }

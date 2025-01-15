@@ -1,13 +1,20 @@
 import { fetchForecastData, fetchParkingData } from "./api.js";
 
 
-async function testAPIs(){
+(async function testAPIs(){
   const parkingData = await fetchParkingData();
   const forecastData = await fetchForecastData();
-  console.log('Parking Data:', parkingData);
-  
+
+
+  console.log('Parking Data from main.js:', parkingData);
   console.log('Forecast Data:', forecastData);
-}
+
+  if (parkingData) {
+    document.querySelector("#parking").textContent = JSON.stringify(parkingData, null, 2);
+  } else {
+    document.querySelector("#parking").textContent = "No parking data available";
+  }
+})();
 
 testAPIs();
 

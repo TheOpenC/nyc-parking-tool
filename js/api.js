@@ -10,29 +10,23 @@ let month = String(today.getMonth()+1).padStart(2, '0'); //MM
 let day = String(today.getDate()).padStart(2, '0'); //DD
 let year = String(today.getFullYear()); //YYYY
 
-const proxy = 'https://proxy.cors.sh/'
 
-
-export async function fetchParkingData(){
-    
-    const parkingURL = `$https://api.nyc.gov/public/api/GetCalendar?fromdate=${month}%2F${day}%2F${year}&todate=${+month + 1}%2F${day}%2F${year}`;
+export async function fetchParkingData() {
+    const parkingURL = "http://localhost:3001/api/parking"; // local proxy server
    
     try {
-        const response = await fetch(parkingURL, {
-            method: 'GET',
-            headers: {
-                'Cache-Control': 'no-cache',
-                'Ocp-Apim-Subscription-Key': 'f900a38d921947fa920d239f7931049f'
-              }
-        });
-        
-        if (!response.ok) throw new Error('Problem fetching parking data.')
+        console.log(`Fetching parking data from: ${parkingURL}`);
+        const response = await fetch(parkingURL);
+        console.log("Raw parking API response:", response);
+
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
         
         //Parse the JSON response
-        const responseText = await response.text();
-        console.log('Parking response text:', responseText)
-        const data = JSON.parse(responseText);
+        const data = await response.json();
+        console.log("Parsed parking API data:", data);
 
+        //return data;
         return data.days.slice(0,8).map((day) => {
             const pDay = parseInt(day.today_id.slice(6, 8), 10); //parseInt ensures int / DD
             const pMonth = parseInt(day.today_id.slice(4, 6), 10) - 1; // -1 for 0 based months. MM
@@ -42,7 +36,7 @@ export async function fetchParkingData(){
             
             return {
                 dateFormat: day.today_id,  //20241230 YYYYMMDD
-                day: pFormatted.toLocaleDateString('en-US', { // calendar formatted date
+                day: pFormatted.toLocaleDateString('en-US', { 
                   weekday: 'long', 
                   month: 'short', 
                   day: 'numeric', 
@@ -54,7 +48,7 @@ export async function fetchParkingData(){
        
     } catch (err) {
         console.log("Error in fetchParkingData", err);
-        return null
+        return null;
     }
 }
 
