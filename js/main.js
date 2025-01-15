@@ -1,13 +1,16 @@
 import { fetchForecastData, fetchParkingData } from "./api.js";
-
+import {combineForecastAndParkingData} from "./combine.js";
 
 (async function testAPIs(){
   const parkingData = await fetchParkingData();
   const forecastData = await fetchForecastData();
+  const combinedData = combineForecastAndParkingData();
 
-
-  console.log('Parking Data from main.js:', parkingData);
-  console.log('Forecast Data:', forecastData);
+  // console.log('Parking Data from main.js:', parkingData);
+  // console.log('Forecast Data from main.js:', forecastData);
+  if (combinedData) {
+    document.querySelector("#combined").textContent = JSON.stringify(combinedData, null, 2);
+  }
 
   if (parkingData) {
     document.querySelector("#parking").textContent = JSON.stringify(parkingData, null, 2);
@@ -16,7 +19,6 @@ import { fetchForecastData, fetchParkingData } from "./api.js";
   }
 })();
 
-testAPIs();
 
 
 // //Fetch Parking data from 311 API

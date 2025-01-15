@@ -17,14 +17,12 @@ export async function fetchParkingData() {
     try {
         console.log(`Fetching parking data from: ${parkingURL}`);
         const response = await fetch(parkingURL);
-        console.log("Raw parking API response:", response);
 
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
         
         //Parse the JSON response
         const data = await response.json();
-        console.log("Parsed parking API data:", data);
 
         //return data;
         return data.days.slice(0,8).map((day) => {
@@ -35,13 +33,13 @@ export async function fetchParkingData() {
             const pFormatted = new Date(pYear, pMonth, pDay);
             
             return {
-                dateFormat: day.today_id,  //20241230 YYYYMMDD
                 day: pFormatted.toLocaleDateString('en-US', { 
                   weekday: 'long', 
                   month: 'short', 
                   day: 'numeric', 
                   year: 'numeric'
                 }),
+                dateFormat: day.today_id,  //20241230 YYYYMMDD
                 parking: day.items[0] // Parking restriction info
               };
         })
@@ -54,7 +52,7 @@ export async function fetchParkingData() {
 
 fetchParkingData().then(data => {
     if (data && data.length > 0) {
-        console.log("Transformed Parking Data:", data);
+       ;
     } else {
         console.log("No parking data returned");
     }
@@ -79,7 +77,20 @@ export async function fetchForecastData() {
         return forecastData.properties.periods.map(period => {
             const dateFormat = period.startTime.slice(0, 10). replace(/-/g, "");
            
+             const wDay = (dateFormat.slice(6, 8)); //parseInt ensures int / DD
+             const wMonth = (dateFormat.slice(4, 6)) - 1; // -1 for 0 based months. MM
+             const wYear = (dateFormat.slice(0, 4)); // YYYY
+
+             const wFormatted = new Date(wYear, wMonth, wDay);
+
             return {
+                //dateFormat: dateFormat,
+                day: wFormatted.toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    month: 'short', 
+                    day: 'numeric', 
+                    year: 'numeric'
+                  }),
                 dateFormat: dateFormat,
                 period: period,
             };
